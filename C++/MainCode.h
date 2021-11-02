@@ -6,10 +6,10 @@
 #include <AK/SoundEngine/Common/AkMemoryMgr.h>
 #include <AK/SoundEngine/Common/IAkStreamMgr.h>
 #include <AK/Tools/Common/AkPlatformFuncs.h>
-#include "AK/SoundEngine//Common/AkStreamMgrModule.h"
+#include "AK/SoundEngine/Common/AkStreamMgrModule.h"
 #include <AK/SoundEngine/Common/AkModule.h>
 #include "AkFilePackageLowLevelIOBlocking.h"
-#include "AK/Plugin//AkVorbisDecoderFactory.h"
+#include "AK/Plugin/AkVorbisDecoderFactory.h"
 #include <random>
 #include "string"
 
@@ -31,6 +31,7 @@ namespace Wwise_Player
 	DllExport int __stdcall Wwise_Get_Playing_Event_Count();
 	DllExport bool __stdcall Wwise_Init(const char* Init_BNK, int Listener_Index, double Init_Volume = 1.0);
 	DllExport bool __stdcall Wwise_Load_Bank(const char* Stream_BNK);
+	DllExport void __stdcall Wwise_Set_Path(const char* Base_Dir_Path);
 	DllExport bool __stdcall Wwise_Play_Name(const char* Name, int Container_ID, double Volume = -1);
 	DllExport bool __stdcall Wwise_Play_ID(unsigned int Event_ID, int Container_ID, double Volume = -1);
 	DllExport bool __stdcall Wwise_Stop_Name(const char* Name);

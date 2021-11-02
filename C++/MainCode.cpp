@@ -1,4 +1,5 @@
 ﻿#include "MainCode.h"
+#include <locale.h>
 
 namespace Wwise_Player
 {
@@ -55,6 +56,14 @@ namespace Wwise_Player
         }
         return false;
     }
+    void __stdcall Wwise_Set_Path(const char* Base_Dir_Path)
+    {
+        wchar_t wc[256];
+        size_t ret;
+        setlocale(LC_CTYPE, "jpn");
+        mbstowcs_s(&ret, wc, 100, Base_Dir_Path, _TRUNCATE);
+        Last_Result = g_lowLevelIO.SetBasePath(wc);
+    }
     void End_Event(AkCallbackType type, AkCallbackInfo* info)
     {
         int Index = -1;
@@ -90,7 +99,7 @@ namespace Wwise_Player
     {
         //IDを指定(ランダム)
         if (Volume != -1 && Volume < 0)
-            Volume = 0;
+            Volume = 0.001;
         else if (Volume > 1)
             Volume = 1;
         AkGameObjectID Object_ID = 0;
@@ -128,7 +137,7 @@ namespace Wwise_Player
     {
         //IDを指定(ランダム)
         if (Volume != -1 && Volume < 0)
-            Volume = 0;
+            Volume = 0.001;
         else if (Volume > 1)
             Volume = 1;
         AkGameObjectID Object_ID = 0;
