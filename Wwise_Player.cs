@@ -1,23 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace WoTB_Voice_Mod_Creater
 {
-    public class Wwise_Player_Native
-    {
-        public static bool IsExecution = false;
-    }
     public class Name_ID_Contaier
     {
         //イベント名
-        public string Event_Name { get; set; }
+        public string Event_Name { get; set; } = "";
         //イベントID
-        public uint Event_ID { get; set; }
+        public uint Event_ID { get; set; } = 0;
         //自由に決めるID(イベント再生が終了したことを)
-        public int Container_ID { get; set; }
-        public int Max_Length { get; set; }
+        public int Container_ID { get; set; } = 0;
+        //イベントの長さ
+        public int Max_Length { get; set; } = 0;
+        //イベントの音量
+        public double Volume { get; set; } = 75;
     }
     //謎のガルパン意識
     public class Container_und_Volume
@@ -28,92 +27,95 @@ namespace WoTB_Voice_Mod_Creater
     public class Wwise_Player
     {
         [DllImport("Wwise_Player.dll")]
-        internal static extern IntPtr Wwise_Get_End_Event_Container_ID();
+        protected static extern IntPtr Wwise_Get_End_Event_Container_ID();
         [DllImport("Wwise_Player.dll")]
-        internal static extern int Wwise_Get_End_Event_Count();
+        protected static extern int Wwise_Get_End_Event_Count();
         [DllImport("Wwise_Player.dll")]
-        internal static extern int Wwise_Get_Playing_Event_Count();
+        protected static extern int Wwise_Get_Playing_Event_Count();
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Init(string Init_BNK, int Listener_Index, double Init_Volume = 1.0);
+        protected static extern bool Wwise_Init(string Init_BNK, int Listener_Index, double Init_Volume = 1.0);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Load_Bank(string Stream_BNK);
+        protected static extern bool Wwise_Load_Bank(string Stream_BNK);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Play_Name(string Name, int Container_ID, double Volume = -1);
+        protected static extern void Wwise_Set_Path(string Base_Dir_Path);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Play_ID(uint Event_ID, int Container_ID, double Volume = -1);
+        protected static extern bool Wwise_Play_Name(string Name, int Container_ID, double Volume = -1);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Stop_Name(string Name);
+        protected static extern bool Wwise_Play_ID(uint Event_ID, int Container_ID, double Volume = -1);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Stop_ID(uint Event_ID);
+        protected static extern bool Wwise_Stop_Name(string Name);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Stop_Container_ID(int Container_ID);
+        protected static extern bool Wwise_Stop_ID(uint Event_ID);
         [DllImport("Wwise_Player.dll")]
-        internal static extern void Wwise_Stop_All();
+        protected static extern bool Wwise_Stop_Container_ID(int Container_ID);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Pause_All(bool IsRenderAudio);
+        protected static extern void Wwise_Stop_All();
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Play_All();
+        protected static extern bool Wwise_Pause_All(bool IsRenderAudio);
         [DllImport("Wwise_Player.dll")]
-        internal static extern int Wwise_Get_Position_Name(string Name);
+        protected static extern bool Wwise_Play_All();
         [DllImport("Wwise_Player.dll")]
-        internal static extern int Wwise_Get_Position_ID(uint Event_ID);
+        protected static extern int Wwise_Get_Position_Name(string Name);
         [DllImport("Wwise_Player.dll")]
-        internal static extern int Wwise_Get_Position_Container_ID(int Container_ID);
+        protected static extern int Wwise_Get_Position_ID(uint Event_ID);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Position_Percent_Name(string Name, float Percent);
+        protected static extern int Wwise_Get_Position_Container_ID(int Container_ID);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Position_Percent_ID(uint Event_ID, float Percent);
+        protected static extern bool Wwise_Set_Position_Percent_Name(string Name, float Percent);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Position_Percent_Container_ID(int Container_ID, float Percent);
+        protected static extern bool Wwise_Set_Position_Percent_ID(uint Event_ID, float Percent);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Position_Second_Name(string Name, int Position);
+        protected static extern bool Wwise_Set_Position_Percent_Container_ID(int Container_ID, float Percent);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Position_Second_ID(uint Event_ID, int Position);
+        protected static extern bool Wwise_Set_Position_Second_Name(string Name, int Position);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Position_Second_Container_ID(int Container_ID, int Position);
+        protected static extern bool Wwise_Set_Position_Second_ID(uint Event_ID, int Position);
         [DllImport("Wwise_Player.dll")]
-        internal static extern int Wwise_Get_Max_Length_Name(string Name);
+        protected static extern bool Wwise_Set_Position_Second_Container_ID(int Container_ID, int Position);
         [DllImport("Wwise_Player.dll")]
-        internal static extern int Wwise_Get_Max_Length_ID(uint Event_ID);
+        protected static extern int Wwise_Get_Max_Length_Name(string Name);
         [DllImport("Wwise_Player.dll")]
-        internal static extern int Wwise_Get_Max_Length_Container_ID(int Container_ID);
+        protected static extern int Wwise_Get_Max_Length_ID(uint Event_ID);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Volume_Name(string Name, double Volume);
+        protected static extern int Wwise_Get_Max_Length_Container_ID(int Container_ID);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Volume_ID(uint Event_ID, double Volume);
+        protected static extern bool Wwise_Set_Volume_Name(string Name, double Volume);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Volume_Container_ID(int Container_ID, double Volume);
+        protected static extern bool Wwise_Set_Volume_ID(uint Event_ID, double Volume);
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_Set_Volume_All(double Volume);
+        protected static extern bool Wwise_Set_Volume_Container_ID(int Container_ID, double Volume);
         [DllImport("Wwise_Player.dll")]
-        internal static extern double Wwise_Get_Volume_Name(string Name);
+        protected static extern bool Wwise_Set_Volume_All(double Volume);
         [DllImport("Wwise_Player.dll")]
-        internal static extern double Wwise_Get_Volume_ID(uint Event_ID);
+        protected static extern double Wwise_Get_Volume_Name(string Name);
         [DllImport("Wwise_Player.dll")]
-        internal static extern double Wwise_Get_Volume_Container_ID(int Container_ID);
+        protected static extern double Wwise_Get_Volume_ID(uint Event_ID);
         [DllImport("Wwise_Player.dll")]
-        internal static extern IntPtr Wwise_Get_Volume_All();
+        protected static extern double Wwise_Get_Volume_Container_ID(int Container_ID);
         [DllImport("Wwise_Player.dll")]
-        internal static extern IntPtr Wwise_Get_All_Container_ID();
+        protected static extern IntPtr Wwise_Get_Volume_All();
         [DllImport("Wwise_Player.dll")]
-        internal static extern void Wwise_Dispose();
+        protected static extern IntPtr Wwise_Get_All_Container_ID();
         [DllImport("Wwise_Player.dll")]
-        internal static extern bool Wwise_IsInited();
+        protected static extern void Wwise_Dispose();
         [DllImport("Wwise_Player.dll")]
-        internal static extern uint Wwise_Get_Result_Index();
+        protected static extern bool Wwise_IsInited();
+        [DllImport("Wwise_Player.dll")]
+        protected static extern uint Wwise_Get_Result_Index();
+
+        public static bool IsExecution { get; private set; } = false;
         /// <summary>
         /// Wwiseが読み込めるInit.bnkは1つのみなので、このクラスは2つ以上作成できません。2回以上宣言する場合は前のWwise_PlayerのDispose()を実行してメモリを解放してください。
-        /// 正常に初期化されなかった場合はthrow new Exception()が返されます。
         /// </summary>
         public static bool Init(string Init_BNK, int Listener_Index = 1, double Set_Init_Volume = 1.0)
         {
-            if (Wwise_Player_Native.IsExecution)
+            if (IsExecution)
                 //throw new Exception("Wwise_Player.dllは既に初期化済みです。Dispose()を実行する必要があります。");
                 return false;
             if (!Wwise_Init(Init_BNK, Listener_Index, Set_Init_Volume))
                 //throw new Exception("関数 Init(string Init_BNK, Listener_Index)を実行できませんでした。");
                 return false;
-            Wwise_Player_Native.IsExecution = true;
+            IsExecution = true;
             return true;
         }
         ///<summary>
@@ -122,7 +124,8 @@ namespace WoTB_Voice_Mod_Creater
         ///</summary>
         public static bool Load_Bank(string Stream_BNK)
         {
-            return Wwise_Load_Bank(Stream_BNK);
+            Wwise_Set_Path(Path.GetDirectoryName(Stream_BNK));
+            return Wwise_Load_Bank(Path.GetFileName(Stream_BNK));
         }
         ///<summaty>
         ///終了したイベントID(Container_ID)をすべて取得します。
@@ -375,7 +378,7 @@ namespace WoTB_Voice_Mod_Creater
         public static void Dispose()
         {
             Wwise_Dispose();
-            Wwise_Player_Native.IsExecution = false;
+            IsExecution = false;
         }
         ///<summary>
         ///Wwiseの初期化がされているかを取得
