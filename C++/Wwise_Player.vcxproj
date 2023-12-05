@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AK\AkDefaultIOHookBlocking.cpp" />
-    <ClCompile Include="AK\AkFilePackage.cpp" />
-    <ClCompile Include="AK\AkFilePackageLUT.cpp" />
-    <ClCompile Include="AK\AkMultipleFileLocation.cpp" />
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common\AkDefaultLowLevelIODispatcher.cpp" />
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common\AkFilePackage.cpp" />
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common\AkFilePackageLUT.cpp" />
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common\AkMultipleFileLocation.cpp" />
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Win32\AkDefaultIOHookBlocking.cpp" />
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Win32\AkDefaultIOHookDeferred.cpp" />
     <ClCompile Include="MainCode.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -39,26 +41,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -152,8 +154,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;WWISEPLAYER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>D:\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Win32;D:\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common;D:\Program Files\Wwise 2019.2.9.7459\SDK\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,6 +164,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>D:\Program Files\Wwise 2019.2.9.7459\SDK\x64_vc160\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>AkSoundEngine.lib;AkMemoryMgr.lib;AkStreamMgr.lib;AkVorbisDecoder.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

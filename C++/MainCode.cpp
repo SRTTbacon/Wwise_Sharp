@@ -5,11 +5,14 @@ namespace Wwise_Player
 {
     CAkFilePackageLowLevelIOBlocking g_lowLevelIO;
     AkBankID BNK_ID = 0;
+    AkGameObjectID Listener = 0;
     std::vector<Name_Playing_ID> Playing_List;
     std::vector<int> End_Event_ID;
     int Listener_Index = 1;
     float Set_Volume = 1.0f;
     AKRESULT Last_Result = AKRESULT::AK_Success;
+    FNV_Hash_Class hashClass;
+
     bool __stdcall Wwise_Init(const char* Init_BNK, int Listener_Index, double Init_Volume)
     {
         //メモリマネージャーの初期化
@@ -40,6 +43,8 @@ namespace Wwise_Player
         AK::StreamMgr::SetCurrentLanguage(AKTEXT("English(US)"));
         //Init.bnkを読み込む
         AK::SoundEngine::LoadBank(Init_BNK, BNK_ID);
+        AK::SoundEngine::RegisterGameObj(Listener, "Default Listener");
+        AK::SoundEngine::SetDefaultListeners(&Listener, 1);
         AK::SoundEngine::RenderAudio();
         Wwise_Player::Listener_Index = Listener_Index;
         Set_Volume = (float)Init_Volume;
@@ -48,21 +53,27 @@ namespace Wwise_Player
     //.bnkファイルをロード(親であるInit.bnkが初期化時と異なる場合はロードできません多分)
     bool __stdcall Wwise_Load_Bank(const char* Stream_BNK)
     {
-        Last_Result = AK::SoundEngine::LoadBank(Stream_BNK, BNK_ID);
+        std::ifstream ifs(Stream_BNK, std::ios_base::in | std::ios_base::binary);
+        if (ifs.fail()) {
+            return false;
+        }
+        std::istreambuf_iterator<char> it_ifs_begin(ifs);
+        std::istreambuf_iterator<char> it_ifs_end{};
+        std::vector<char> input_data(it_ifs_begin, it_ifs_end);
+        if (ifs.fail()) {
+            ifs.close();
+            return false;
+        }
+        Last_Result = AK::SoundEngine::LoadBankMemoryCopy(input_data.data(), (unsigned long)input_data.size(), BNK_ID);
+        ifs.close();
+        input_data.clear();
+        //Last_Result = AK::SoundEngine::LoadBank(Stream_BNK, BNK_ID);
         if (Last_Result == AK_Success)
         {
             AK::SoundEngine::RenderAudio();
             return true;
         }
         return false;
-    }
-    void __stdcall Wwise_Set_Path(const char* Base_Dir_Path)
-    {
-        wchar_t wc[256];
-        size_t ret;
-        setlocale(LC_CTYPE, "jpn");
-        mbstowcs_s(&ret, wc, 100, Base_Dir_Path, _TRUNCATE);
-        Last_Result = g_lowLevelIO.SetBasePath(wc);
     }
     void End_Event(AkCallbackType type, AkCallbackInfo* info)
     {
@@ -131,6 +142,17 @@ namespace Wwise_Player
             return true;
         }
         return false;
+    }
+    unsigned long __stdcall Wwise_Play_ObjectID(const char* Name, unsigned int ObjectID)
+    {
+        AkGameObjectID Object_ID = ObjectID;
+        AK::SoundEngine::RegisterGameObj(Object_ID);
+        if (unsigned long a = AK::SoundEngine::PostEvent(Name, Object_ID) != 0)
+        {
+            AK::SoundEngine::RenderAudio();
+            return a;
+        }
+        return 0;
     }
     //イベントIDで再生
     bool __stdcall Wwise_Play_ID(unsigned int Event_ID, int Container_ID, double Volume)
@@ -229,6 +251,12 @@ namespace Wwise_Player
         }
         AK::SoundEngine::RenderAudio();
         return IsStopped;
+    }
+    void __stdcall Wwise_Stop_Object_ID(unsigned int GameObject_ID, unsigned long Playing_ID)
+    {
+        AK::SoundEngine::StopPlayingID(Playing_ID);
+        AK::SoundEngine::UnregisterGameObj(GameObject_ID);
+        AK::SoundEngine::RenderAudio();
     }
     void _stdcall Wwise_Stop_All()
     {
@@ -413,6 +441,22 @@ namespace Wwise_Player
         for (int Number = 0; Number < (int)Playing_List.size(); Number++)
             Temp[Number] = Playing_List[Number].Volume;
         return Temp;
+    }
+    bool __stdcall Wwise_Set_State(const char* State_Parent_Name, const char* State_Child_Name)
+    {
+        Last_Result = AK::SoundEngine::SetState(State_Parent_Name, State_Child_Name);
+        bool IsOK = Last_Result == AK_Success ? true : false;
+        AK::SoundEngine::RenderAudio();
+        return IsOK;
+    }
+    bool __stdcall Wwise_Set_RTPC(const char* RTPC_Name, float Value)
+    {
+        if (Value < 0)
+            Value = 0.0f;
+        Last_Result = AK::SoundEngine::SetRTPCValue(RTPC_Name, Value);
+        bool IsOK = Last_Result == AK_Success ? true : false;
+        AK::SoundEngine::RenderAudio();
+        return IsOK;
     }
     int* _stdcall Wwise_Get_All_Container_ID()
     {
@@ -627,7 +671,37 @@ namespace Wwise_Player
         AK::SoundEngine::RenderAudio();
         return After_Pos;
     }
-    //解放(以降上にあるメゾットたちは使用できません)
+    //オブジェクトの位置を設定
+    void _stdcall Wwise_Set_Listener_Position(float X, float Y, float Z, float OriFrontX, float OriFrontY, float OriFrontZ, float OriTopX, float OriTopY, float OriTopZ)
+    {
+        AkSoundPosition Pos{};
+        Pos.Set(X, Y, Z, OriFrontX, OriFrontY, OriFrontZ, OriTopX, OriTopY, OriTopZ);
+        Last_Result = AK::SoundEngine::SetPosition(Listener, Pos);
+    }
+    void _stdcall Wwise_Set_Object_Position(unsigned int Object_ID, float X, float Y, float Z, float OriFrontX, float OriFrontY, float OriFrontZ, float OriTopX, float OriTopY, float OriTopZ)
+    {
+        AkSoundPosition Pos{};
+        Pos.Set(X, Y, Z, OriFrontX, OriFrontY, OriFrontZ, OriTopX, OriTopY, OriTopZ);
+        Last_Result = AK::SoundEngine::SetPosition(Object_ID, Pos);
+    }
+    void _stdcall Wwise_Set_Object_Positions(unsigned int Object_ID, int Count, float* X, float* Y, float* Z, float* OriFrontX, float* OriFrontY, float* OriFrontZ,
+        float* OriTopX, float* OriTopY, float* OriTopZ)
+    {
+        std::vector<float> VecX(X, X + Count);
+        std::vector<float> VecY(Y, Y + Count);
+        std::vector<float> VecZ(Z, Z + Count);
+        std::vector<float> VecFrontX(OriFrontX, OriFrontX + Count);
+        std::vector<float> VecFrontY(OriFrontY, OriFrontY + Count);
+        std::vector<float> VecFrontZ(OriFrontZ, OriFrontZ + Count);
+        std::vector<float> VecTopX(OriTopX, OriTopX + Count);
+        std::vector<float> VecTopY(OriTopY, OriTopY + Count);
+        std::vector<float> VecTopZ(OriTopZ, OriTopZ + Count);
+        AkSoundPosition* Pos_List = new AkSoundPosition[Count];
+        for (int i = 0; i < Count; i++)
+            Pos_List[i].Set(VecX[i], VecY[i], VecZ[i], VecFrontX[i], VecFrontY[i], VecFrontZ[i], VecTopX[i], VecTopY[i], VecTopZ[i]);
+        Last_Result = AK::SoundEngine::SetMultiplePositions(Object_ID, Pos_List, Count);
+    }
+    //解放(Wwise_Init()を実行するまで上にあるメゾットたちは使用できません)
     void __stdcall Wwise_Dispose()
     {
         AK::SoundEngine::StopAll();
@@ -649,4 +723,156 @@ namespace Wwise_Player
     {
         return Last_Result;
     }
+
+    char* _stdcall HashToChar(int length, unsigned int shortID)
+    {
+        hashClass.Bruteforce(length, shortID);
+        hashClass._bytes.push_back(hashClass.returnLastByte);
+        //HANDLE file = CreateFile(AKTEXT("Test.dat"), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
+        //DWORD dwActualWrite;
+        //WriteFile(file, hashClass._bytes.data(), hashClass._bytes.size(), &dwActualWrite, NULL);
+        //WriteFile(file, hashClass.returnLastByte, hashClass._bytes.size(), &dwActualWrite, NULL);
+        //std::ofstream binFile("Test.dat", std::ios::out | std::ios::binary);
+        //binFile.write((char*)hashClass._bytes.data(), hashClass._bytes.size());
+        //binFile.close();
+        return (char*)hashClass._bytes.data();
+    }
+
+    int _stdcall GetHashLength()
+    {
+        return (int)hashClass._bytes.size();
+    }
+
+    void FNV_Hash_Class::Initialize(int length)
+    {
+        _bytes.clear();
+        _hashes.clear();
+        _bytes = std::vector<unsigned char>(length - 1);
+        _hashes = std::vector<unsigned int>(length - 1);
+        _bytes[0] = 0x60;
+        for (auto i = 1; i < _bytes.size(); i++)
+        {
+            _bytes[i] = 0x5f;
+        }
+    }
+
+    void FNV_Hash_Class::Bruteforce(int Length, unsigned int match)
+    {
+        Initialize(Length);
+        while (true)
+        {
+            int depth = (int)_bytes.size() - 1;
+            while (Utilities::Increment(_bytes, depth))
+            {
+                depth--;
+                if (depth == -1)
+                {
+                    return;
+                }
+            }
+            Utilities::ZeroFrom(_hashes, depth);
+            unsigned char lastByte = 0x2f;
+            unsigned int tempHash = Hash(_bytes, _hashes, (int)_bytes.size()) * Prime;
+            unsigned char nextByte;
+            while (!Utilities::Increment(lastByte, nextByte))
+            {
+                lastByte = nextByte;
+                unsigned int result = tempHash;
+                result ^= lastByte;
+                if (result == match)
+                {
+                    returnLastByte = lastByte;
+                    return;
+                }
+            }
+        }
+    }
+
+    unsigned int FNV_Hash_Class::Hash(std::vector<unsigned char>& array, std::vector<unsigned int>& hashes, int length)
+    {
+        if (length > 1)
+        {
+            unsigned int hash = hashes[static_cast<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type>(length) - 1];
+            if (hash > 0)
+            {
+                return hash;
+            }
+            else
+            {
+                hash = Hash(array, hashes, length - 1) * Prime;
+                hash ^= array[static_cast<std::vector<unsigned char, std::allocator<unsigned char>>::size_type>(length) - 1];
+                hashes[static_cast<std::vector<std::seed_seq::result_type, std::allocator<std::seed_seq::result_type>>::size_type>(length) - 1] = hash;
+                return hash;
+            }
+        }
+        else
+        {
+            unsigned int hash = OffsetBasis;
+            hash *= Prime;
+            hash ^= array[0];
+            hashes[0] = hash;
+            return hash;
+        }
+    }
+
+    bool Utilities::Increment(std::vector<unsigned char>& array, int i)
+    {
+        auto result = static_cast<unsigned char>(array[i] + 1);
+        if (result == 0x3a)
+        {
+            array[i] = 0x61;
+            return false;
+        }
+        else if (result == 0x7b)
+        {
+            if (i > 0)
+            {
+                array[i] = 0x5f;
+                return false;
+            }
+            else
+            {
+                array[i] = 0x61;
+                return true;
+            }
+        }
+        else if (result == 0x60)
+        {
+            array[i] = 0x30;
+            return true;
+        }
+        array[i] = result;
+        return false;
+    }
+
+    bool Utilities::Increment(unsigned char from, unsigned char& result)
+    {
+        result = static_cast<unsigned char>(from + 1);
+        if (result == 0x3a)
+        {
+            result = 0x61;
+            return false;
+        }
+        else if (result == 0x7b)
+        {
+            result = 0x5f;
+            return false;
+        }
+        else if (result == 0x60)
+        {
+            result = 0x30;
+            return true;
+        }
+        return false;
+    }
+
+    void Utilities::ZeroFrom(std::vector<unsigned int>& array, int i)
+    {
+        while (i < array.size())
+        {
+            array[i] = 0;
+            i++;
+        }
+    }
+
 }

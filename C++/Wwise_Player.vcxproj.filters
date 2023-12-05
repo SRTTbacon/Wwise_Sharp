@@ -14,23 +14,29 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="AK">
-      <UniqueIdentifier>{646e3bc8-728b-4c78-8829-dfb8d7b3e283}</UniqueIdentifier>
+      <UniqueIdentifier>{98f3cec2-7475-4a51-8d5c-b38118205c01}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MainCode.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="AK\AkFilePackage.cpp">
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Win32\AkDefaultIOHookBlocking.cpp">
       <Filter>AK</Filter>
     </ClCompile>
-    <ClCompile Include="AK\AkFilePackageLUT.cpp">
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Win32\AkDefaultIOHookDeferred.cpp">
       <Filter>AK</Filter>
     </ClCompile>
-    <ClCompile Include="AK\AkDefaultIOHookBlocking.cpp">
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common\AkDefaultLowLevelIODispatcher.cpp">
       <Filter>AK</Filter>
     </ClCompile>
-    <ClCompile Include="AK\AkMultipleFileLocation.cpp">
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common\AkFilePackage.cpp">
+      <Filter>AK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common\AkFilePackageLUT.cpp">
+      <Filter>AK</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Program Files\Wwise 2019.2.9.7459\SDK\samples\SoundEngine\Common\AkMultipleFileLocation.cpp">
       <Filter>AK</Filter>
     </ClCompile>
   </ItemGroup>
